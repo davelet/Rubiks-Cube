@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { LOGO } from './config'
 
 export const rotateAroundWorldAxis = (origin: THREE.Vector3, vector: THREE.Vector3, radius: number) => {
   vector.normalize()
@@ -83,12 +82,5 @@ export const getFaceColor = (
     ctx.fillText(text, size / 2 - w / 2, size / 2 - h / 2)
   }
   return canvas
-  // else return new Promise((resolve, reject) => {
-  //   const img = new Image()
-  //   img.onload = () => {
-  //     ctx.drawImage(img, 0, 0, size, size)
-  //     resolve(canvas)
-  //   }
-  //   img.src = LOGO
-  // })
+
 }
