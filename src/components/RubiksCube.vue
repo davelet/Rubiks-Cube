@@ -10,7 +10,8 @@ const container = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   if (container.value) {
-    new CreepCube()
+    const cube = new CreepCube()
+    container.value.appendChild(cube.renderer.domElement)
   }
 })
 </script>

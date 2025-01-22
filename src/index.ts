@@ -1,10 +1,10 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import anime from 'animejs'
-import Base from './base'
 import { rotateAroundWorldAxis, XYZ_VALUE, AxesEnum, AxesVec3, getFaceColor, colors } from './utils'
 import { Pane } from 'tweakpane'
 
-const pane: any = new Pane()
+// const pane: any = new Pane()
 const debug = {
   level: 3,
   rotateTime: 300,
@@ -14,7 +14,13 @@ const debug = {
   cubeSize: 2,
 }
 
-export default class CreepCube extends Base {
+export default class CreepCube {
+  width: number
+  height: number
+  renderer!: THREE.WebGLRenderer
+  scene!: THREE.Scene
+  camera!: THREE.PerspectiveCamera
+  controls!: OrbitControls
   intersect1: THREE.Intersection | null = null
   intersect2: THREE.Intersection | null = null
   startPlane: THREE.Vector3 | undefined = undefined
@@ -29,20 +35,63 @@ export default class CreepCube extends Base {
   mesh!: THREE.Group
   children: THREE.Mesh[] = []
   coordinate: THREE.Vector3[] = []
-
-  constructor (config = {
-    level: 3
-  }) {
-    super()
+  private pane: Pane
+  constructor (config = { level: 3 }) {
+    this.pane = new Pane()
+    this.width = window.innerWidth
+    this.height = window.innerHeight
+    this.initRenderer()
+    this.initScene()
+    this.initCamera()
+    this.initControls()
     this.initDebug()
     this.initCube()
-    // this.initLight()
+    this.render()
+    
     window.addEventListener('mousedown', this.onMouseDown.bind(this))
     window.addEventListener('touchstart', this.onMouseDown.bind(this))
     window.addEventListener('mousemove', this.onMouseMove.bind(this))
     window.addEventListener('touchmove', this.onMouseMove.bind(this))
     window.addEventListener('mouseup', this.onMouseUp.bind(this))
     window.addEventListener('touchend', this.onMouseUp.bind(this))
+  }
+
+  // 从 Base 类移过来的方法
+  initRenderer () {
+    const renderer = this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    })
+    renderer.setSize(this.width, this.height)
+    renderer.setPixelRatio(window.devicePixelRatio)
+    document.body.appendChild(renderer.domElement)
+  }
+
+  initScene () {
+    this.scene = new THREE.Scene()
+  }
+
+  initCamera () {
+    const camera = this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 100)
+    camera.position.set(15, 15, 15)
+    camera.lookAt(0, 0, 0)
+  }
+
+  initControls () {
+    const controls = this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    controls.target = new THREE.Vector3(0, 0, 0)
+    controls.enableZoom = false
+    controls.rotateSpeed = 1
+    controls.update()
+  }
+
+  render () {
+    this.controls.update()
+    this.renderer.clear()
+    this.renderer.render(this.scene, this.camera)
+    window.requestAnimationFrame(() => {
+      this.render()
+    })
   }
 
   computeMaterial (
@@ -334,8 +383,8 @@ export default class CreepCube extends Base {
   }
 
   initDebug () {
-    const f1 = pane.addFolder({ title: '参数' })
-    this['inp1'] = f1.addInput(debug, 'level', {
+    const f1 = this.pane.addFolder({ title: '参数' })
+    this['inp1'] = f1.addBinding(debug, 'level', {
       label: '难度',
       options: {
         '二阶': 2,
@@ -351,26 +400,26 @@ export default class CreepCube extends Base {
       this.camera.position.set(lev * 5, lev * 5, lev * 5)
       this.camera.lookAt(0, 0, 0)
     })
-    f1.addInput(debug, 'radius', {
+    f1.addBinding(debug, 'radius', {
       label: '圆角',
       min: 0,
       max: 100,
     }).on('change', () => {
       this.initCube()
     })
-    f1.addInput(debug, 'gutter', {
+    f1.addBinding(debug, 'gutter', {
       label: '缝隙',
       min: 0,
       max: 50,
     }).on('change', () => {
       this.initCube()
     })
-    f1.addInput(debug, 'gutterColor', {
+    f1.addBinding(debug, 'gutterColor', {
       label: '缝隙颜色',
     }).on('change', () => {
       this.initCube()
     })
-    const f2 = pane.addFolder({ title: '操作' })
+    const f2 = this.pane.addFolder({ title: '操作' })
     this['btn1'] = f2.addButton({
       title: 'Reset 重置',
     }).on('click', () => {
@@ -383,7 +432,7 @@ export default class CreepCube extends Base {
     })
     this['btn3'] = f2.addButton({
       title: 'Solve 还原',
-      disabled: true
+      // disabled: true
     }).on('click', () => {
       this.shuffleCube()
     })
