@@ -125,7 +125,7 @@ class CreepCube {
   mesh!: THREE.Group
   children: THREE.Mesh[] = []
   coordinate: THREE.Vector3[] = []
-  private pane: Pane
+  pane: Pane
   constructor(config = { level: 3 }) {
     this.pane = new Pane()
     this.width = window.innerWidth
@@ -598,6 +598,10 @@ onBeforeUnmount(() => {
     window.removeEventListener('mouseup', cube.value.onMouseUp)
     window.removeEventListener('touchend', cube.value.onMouseUp)
     
+    // 清理调试面板
+    if (cube.value.pane) {
+      cube.value.pane.dispose()
+    }
     // 清理渲染器
     cube.value.renderer.dispose()
     cube.value = null
