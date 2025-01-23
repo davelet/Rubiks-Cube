@@ -579,27 +579,28 @@ class CreepCube {
   }
 }
 const container = ref<HTMLElement | null>(null)
+const cube = ref<CreepCube | null>(null) 
 
 onMounted(() => {
   if (container.value) {
-    const cube = new CreepCube()
-    container.value.appendChild(cube.renderer.domElement)
+    cube.value = new CreepCube()
+    container.value.appendChild(cube.value.renderer.domElement)
   }
 })
 
 onBeforeUnmount(() => {
-  if (cube) {
+  if (cube.value) {
     // 清理事件监听器
-    window.removeEventListener('mousedown', cube.onMouseDown)
-    window.removeEventListener('touchstart', cube.onMouseDown)
-    window.removeEventListener('mousemove', cube.onMouseMove)
-    window.removeEventListener('touchmove', cube.onMouseMove)
-    window.removeEventListener('mouseup', cube.onMouseUp)
-    window.removeEventListener('touchend', cube.onMouseUp)
+    window.removeEventListener('mousedown', cube.value.onMouseDown)
+    window.removeEventListener('touchstart', cube.value.onMouseDown)
+    window.removeEventListener('mousemove', cube.value.onMouseMove)
+    window.removeEventListener('touchmove', cube.value.onMouseMove)
+    window.removeEventListener('mouseup', cube.value.onMouseUp)
+    window.removeEventListener('touchend', cube.value.onMouseUp)
     
     // 清理渲染器
-    cube.renderer.dispose()
-    cube = null
+    cube.value.renderer.dispose()
+    cube.value = null
   }
 })
 </script>
